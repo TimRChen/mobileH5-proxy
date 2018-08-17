@@ -20,8 +20,9 @@ app.use((req, res, next) => {
 // 监听MobileH5V2服务
 app.all(/\/mobileH5/, (req, res) => {
     const path = req.path;
-    const proxyPort = whiteList[path];
+    let proxyPort = whiteList[path];
     const originalUrl = req.originalUrl;
+    if (proxyPort === void 0) proxyPort = 80;
     const routerURL = `http://10.8.8.8:${proxyPort}${originalUrl}`;
     broadCast(req.method, path, proxyPort, routerURL);
     res.redirect(routerURL);

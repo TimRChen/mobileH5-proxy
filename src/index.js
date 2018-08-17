@@ -43,10 +43,8 @@ app.all(/\/mobileH5/, (req, res) => {
 // 非mobileH5V2服务直接转发至80服务
 app.use('/', (req, res) => {
     console.log('This path is not from /MobileH5: \x1b[31m', req.originalUrl);
-    let searchParams = getSearchParams(req.query);
-    let routerURL = new URL(`${req.protocol}://${req.host}${req.path}${searchParams}`);
-    broadCast(req.method, req.path, 'original port', routerURL.href);
-    res.redirect(routerURL.href);
+    broadCast(req.method, req.path, 'original port', req.originalUrl);
+    res.redirect(req.originalUrl);
     endBoradCast();
 });
 

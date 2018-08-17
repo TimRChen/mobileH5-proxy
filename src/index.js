@@ -18,7 +18,7 @@ const getSearchParams = query => {
             searchParamList.push(`${param}=${encodeURIComponent(query[param])}`);
         }
     }
-    return `?${searchParamList.join('&')}`;
+    return searchParamList.length === 0 ? '' : `?${searchParamList.join('&')}`;
 };
 
 app.use((req, res, next) => {
@@ -41,12 +41,11 @@ app.all(/\/mobileH5/, (req, res) => {
 });
 
 // 非mobileH5V2服务直接转发至80服务
-app.use('/*', (req, res) => {
+app.use('/', (req, res) => {
     console.log('This path is not from /MobileH5: \x1b[31m', req.originalUrl);
     let searchParams = getSearchParams(req.query);
-    let routerURL = new URL(`${req.protocol}://${req.headers.host}${req.path}${searchParams}`);
-    routerURL.port = 80;
-    broadCast(req.method, req.path, '80', routerURL.href);
+    let routerURL = new URL(`${req.protocol}://${req.host}${req.path}${searchParams}`);
+    broadCast(req.method, req.path, 'original port', routerURL.href);
     res.redirect(routerURL.href);
     endBoradCast();
 });

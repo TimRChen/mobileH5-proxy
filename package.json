@@ -1,0 +1,25 @@
+{
+  "name": "mobileh5-proxy",
+  "version": "1.0.0",
+  "description": "to proxy mobileH5 port",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TimRChen/mobileH5-proxy.git"
+  },
+  "keywords": [
+    "proxy"
+  ],
+  "author": "timrchen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TimRChen/mobileH5-proxy/issues"
+  },
+  "homepage": "https://github.com/TimRChen/mobileH5-proxy#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}

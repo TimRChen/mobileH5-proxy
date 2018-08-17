@@ -1,0 +1,16 @@
+[
+    {
+      "name": "mobileH5-proxy",
+      "script": "./src/index.js",
+      "exec_mode" : "fork",
+      "instances" : 1,
+      "args": "log",
+      "log_date_format": "YYYY-MM-DD HH:mm Z",
+      "watch": false,
+      "merge_logs"  : true,
+      "env": {
+        "NODE_PORT": 61234,
+        "NODE_ENV": "development"
+      }
+    }
+]

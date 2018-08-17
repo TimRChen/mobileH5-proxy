@@ -21,23 +21,24 @@ app.use((req, res, next) => {
 app.all(/\/mobileH5/, (req, res) => {
     const path = req.path;
     let proxyPort = whiteList[path];
-    const originalUrl = req.originalUrl;
     if (proxyPort === void 0) proxyPort = 80;
-    const routerURL = `http://10.8.8.8:${proxyPort}${originalUrl}`;
-    broadCast(req.method, path, proxyPort, routerURL);
-    res.redirect(routerURL);
+    let routerURL = new URL(`${req.protocol}://${req.headers.host}${req.originalUrl}`);
+    routerURL.port = proxyPort; // change the port.
+    broadCast(req.method, path, proxyPort, routerURL.href);
+    res.redirect(routerURL.href);
     endBoradCast();
 });
 
 // 非mobileH5V2服务直接转发至80服务
 app.use('/*', (req, res) => {
     console.log('This path is not from /MobileH5: \x1b[31m', req.originalUrl);
-    const originalUrl = req.originalUrl;
-    const routerURL = `https://test.yangcong345.com${originalUrl}`;
-    broadCast(req.method, req.path, '80', routerURL);
-    res.redirect(routerURL);
+    let routerURL = new URL(`${req.protocol}://${req.headers.host}${req.originalUrl}`);
+    if (routerURL.host !== '10.8.8.8') routerURL.port = 80;
+    broadCast(req.method, req.path, '80', routerURL.href);
+    res.redirect(routerURL.href);
     endBoradCast();
 });
+
 
 app.listen(61234, () => {
     console.log(`

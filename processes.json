@@ -2,6 +2,7 @@
     {
       "name": "mobileH5-proxy",
       "script": "./src/index.js",
+      "interpreter":"node@10.8.0",
       "exec_mode" : "fork",
       "instances" : 1,
       "args": "log",

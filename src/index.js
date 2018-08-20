@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const app = require('express')();
 const whiteList = require('../config/white-list.json');
 
@@ -8,7 +10,7 @@ const broadCast = (method, path, proxyPort, routerURL) => {
 };
 
 const endBoradCast = () => {
-    console.log('----------------------------------');
+    console.log('-------------------------------\n');
 };
 
 const getSearchParams = query => {
@@ -22,9 +24,20 @@ const getSearchParams = query => {
 };
 
 app.use((req, res, next) => {
-    console.log('The request has entered.');
-    console.log('------------------------\\______\n');
+    console.log('\x1b[36mThe request has entered.');
+    console.log('===============================');
     next();
+});
+
+// pac文件自动配置
+app.all('/mobileH5V2-proxy.pac', (req, res) => {
+    console.log('pac file is being configured..');
+    const pacPath = path.join(__dirname, '..', 'config/proxy.pac');
+    fs.readFile(pacPath, 'utf8', (err, data) => {
+        if (err) throw err;
+        res.send(data);
+    });
+    endBoradCast();
 });
 
 // 监听MobileH5V2服务
@@ -36,7 +49,11 @@ app.all(/\/mobileH5/, (req, res) => {
     let routerURL = new URL(`${req.protocol}://${req.headers.host}${req.path}${searchParams}`);
     routerURL.port = proxyPort; // change the port.
     broadCast(req.method, path, proxyPort, routerURL.href);
-    res.redirect(routerURL.href);
+    try {
+        res.redirect(routerURL.href);
+    } catch {
+        console.error('redirect error..');
+    }
     endBoradCast();
 });
 
@@ -44,7 +61,11 @@ app.all(/\/mobileH5/, (req, res) => {
 app.use('/', (req, res) => {
     console.log('This path is not from /MobileH5: \x1b[31m', req.originalUrl);
     broadCast(req.method, req.path, 'original port', req.originalUrl);
-    res.redirect(req.originalUrl);
+    try {
+        res.redirect(req.originalUrl);
+    } catch {
+        console.error('redirect error..');
+    }
     endBoradCast();
 });
 

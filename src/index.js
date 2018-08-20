@@ -31,12 +31,12 @@ app.use((req, res, next) => {
 
 // pac文件自动配置
 app.all('/mobileH5V2-proxy.pac', (req, res) => {
-    console.log('pac file is being configured..');
     const pacPath = path.join(__dirname, '..', 'config/proxy.pac');
     fs.readFile(pacPath, 'utf8', (err, data) => {
         if (err) throw err;
         res.send(data);
     });
+    console.log('pac file is being configured..');
     endBoradCast();
 });
 
@@ -49,10 +49,12 @@ app.all(/\/mobileH5/, (req, res) => {
     let routerURL = new URL(`${req.protocol}://${req.headers.host}${req.path}${searchParams}`);
     routerURL.port = proxyPort; // change the port.
     broadCast(req.method, path, proxyPort, routerURL.href);
-    try {
-        res.redirect(routerURL.href);
-    } catch {
-        console.error('redirect error..');
+    if (req.headers.host === '10.8.8.8:61234') {
+        try {
+            res.redirect(routerURL.href);
+        } catch {
+            console.error('redirect error..');
+        }
     }
     endBoradCast();
 });
@@ -61,10 +63,12 @@ app.all(/\/mobileH5/, (req, res) => {
 app.use('/', (req, res) => {
     console.log('This path is not from /MobileH5: \x1b[31m', req.originalUrl);
     broadCast(req.method, req.path, 'original port', req.originalUrl);
-    try {
-        res.redirect(req.originalUrl);
-    } catch {
-        console.error('redirect error..');
+    if (req.headers.host === '10.8.8.8:61234') {
+        try {
+            res.redirect(req.originalUrl);
+        } catch {
+            console.error('redirect error..');
+        }
     }
     endBoradCast();
 });

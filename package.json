@@ -1,6 +1,6 @@
 {
   "name": "mobileh5-proxy",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "to proxy mobileH5 port",
   "main": "index.js",
   "scripts": {

@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/TimRChen/mobileH5-proxy#readme",
   "dependencies": {
+    "axios": "^0.18.0",
     "express": "^4.16.3"
   }
 }

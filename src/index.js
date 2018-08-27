@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 const app = require('express')();
 const whiteList = require('../config/white-list.json');
 
@@ -41,21 +42,21 @@ app.all('/mobileH5V2-proxy.pac', (req, res) => {
 });
 
 // 监听MobileH5V2服务
-app.all(/\/mobileH5/, (req, res) => {
+app.all(/^\/mobileH5/, (req, res) => {
     const path = req.path;
     let proxyPort = whiteList[path];
     if (proxyPort === void 0) proxyPort = 80;
     let searchParams = getSearchParams(req.query);
+    // let routerURL = new URL(`${req.protocol}://10.8.8.8:9050${req.path}${searchParams}`); // for test.
     let routerURL = new URL(`${req.protocol}://${req.headers.host}${req.path}${searchParams}`);
     routerURL.port = proxyPort; // change the port.
     broadCast(req.method, path, proxyPort, routerURL.href);
-    if (req.headers.host === '10.8.8.8:61234') {
-        try {
-            res.redirect(routerURL.href);
-        } catch {
-            console.error('redirect error..');
-        }
-    }
+    axios.get(routerURL.href).then(response => {
+        const targetHtmlData = response.data.replace(/src=\//mg, 'src=/9050/').replace(/href=\//mg, 'href=/9050/');
+        res.send(targetHtmlData);
+    }).catch(error => {
+        console.error(error);
+    });
     endBoradCast();
 });
 
@@ -63,13 +64,30 @@ app.all(/\/mobileH5/, (req, res) => {
 app.use('/', (req, res) => {
     console.log('This path is not from /MobileH5: \x1b[31m', req.originalUrl);
     broadCast(req.method, req.path, 'original port', req.originalUrl);
-    if (req.headers.host === '10.8.8.8:61234') {
-        try {
-            res.redirect(req.originalUrl);
-        } catch {
-            console.error('redirect error..');
-        }
+    let url = null;
+    if (req.path.slice(1, 3) === '90') {
+        url = `${req.protocol}://10.8.8.8:${req.path.slice(1, 5)}${req.path.slice(5)}`;
+    } else {
+        url = `${req.protocol}://10.8.8.8${req.path}`;
     }
+    axios({
+        url,
+        method: 'GET',
+        responseType: 'stream'
+    }).then(response => {
+        const contentType = response.headers['content-type'];
+        res.format({
+            [contentType]: () => {
+                res.set('Proxy-Connection', 'keep-alive');
+                response.data.pipe(res);
+            }
+        });
+    }).catch(error => {
+        console.error(error);
+        if (!!error.response === true) {
+            res.sendStatus(error.response.status);
+        }
+    });
     endBoradCast();
 });
 

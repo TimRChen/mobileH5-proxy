@@ -19,7 +19,7 @@ app.all('/mobileH5V2-proxy.pac', (req, res) => {
         res.send(data);
     });
     console.log('pac file is being configured..');
-    endBoradCast();
+    utils.endBoradCast();
 });
 
 // 监听MobileH5V2服务
@@ -28,15 +28,15 @@ app.all(/^\/mobileH5/, (req, res) => {
     let proxyPort = whiteList[path];
     if (proxyPort === void 0) proxyPort = 80;
     let searchParams = utils.getSearchParams(req.query);
-    // let routerURL = new URL(`${req.protocol}://10.8.8.8:9050${req.path}${searchParams}`); // for test.
-    let routerURL = new URL(`${req.protocol}://${req.headers.host}${req.path}${searchParams}`);
+    let routerURL = new URL(`${req.protocol}://10.8.8.8:9050${req.path}${searchParams}`); // for test.
+    // let routerURL = new URL(`${req.protocol}://${req.headers.host}${req.path}${searchParams}`);
     routerURL.port = proxyPort; // change the port.
     utils.broadCast(req.method, path, proxyPort, routerURL.href);
     axios.get(routerURL.href).then(response => {
         const targetHtmlData = response.data.replace(/src=\//mg, 'src=/9050/').replace(/href=\//mg, 'href=/9050/');
         res.send(targetHtmlData);
     }).catch(error => {
-        console.error(error);
+        console.error(`${error.response.status} ${error.response.statusText}`);
     });
     utils.endBoradCast();
 });
@@ -64,7 +64,7 @@ app.use('/', (req, res) => {
             }
         });
     }).catch(error => {
-        console.error(error);
+        console.error(`${error.response.status} ${error.response.statusText}`);
         if (!!error.response === true) {
             res.sendStatus(error.response.status);
         }
